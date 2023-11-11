@@ -28,7 +28,7 @@ async function getGameById(id: number){
             id
         },
         include:{
-            bet: true
+            Bet: true
         }
     })
 
