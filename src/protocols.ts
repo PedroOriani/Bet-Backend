@@ -8,6 +8,14 @@ export type inputGameBody = {
 	awayTeamName: string;
 }
 
+export type inputBetBody = {
+    homeTeamScore: number;
+    awayTeamScore: number;
+    amountBet: number;
+    gameId: number;
+    participantId: number;
+}
+
 export type ApplicationError = {
     name: string;
     message: string;

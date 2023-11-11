@@ -17,9 +17,34 @@ async function getParticipants(){
     return participants
 }
 
+async function getParticipantById(id: number){
+    const participant = await prisma.participant.findUnique({
+        where: {
+            id
+        }
+    })
+
+    return participant
+}
+
+async function updateParticipantBalance(participantId: number, newBalance: number) {
+    const participantUpdated = await prisma.participant.update({
+        where: {
+            id: participantId,
+        },
+        data: {
+            balance: newBalance
+        }
+    })
+
+    return participantId
+}
+
 const participantRepository = {
     createParticipant,
-    getParticipants
+    getParticipants,
+    getParticipantById,
+    updateParticipantBalance
 }
 
 export default participantRepository;
