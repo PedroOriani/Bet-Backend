@@ -1,8 +1,11 @@
 import { Router } from "express";
-import participantController from "../controllers/bet-controller";
+import participantController from "../controllers/participant-controller";
+import { validateSchema } from "../middlewares/schema-middleware";
+import { participantSchema } from "../schemas/participant-schema";
 
-const participantRouter = Router()
+const participantsRouter = Router()
 
-participantRouter.post('/', participantController.createParticipant).get('/', participantController.getParticipants)
+participantsRouter.post('/', validateSchema(participantSchema), participantController.createParticipant)
+participantsRouter.get('/', participantController.getParticipants)
 
-export { participantRouter }
+export { participantsRouter }

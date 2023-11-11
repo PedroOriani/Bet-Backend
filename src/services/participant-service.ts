@@ -1,12 +1,13 @@
 import participantRepository from "../repositories/participant-repository";
 
-async function createParticipant(name: String, balance: Number){
+async function createParticipant(name: string, balance: number){
 
-    return participantRepository.createParticipant(name, balance)
+    return await participantRepository.createParticipant(name, balance)
 }
 
-async function getParticipants(req: Request, res: Response){
+async function getParticipants(){
     
+    return await participantRepository.getParticipants()
 }
 
 const participantService = {

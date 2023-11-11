@@ -1,15 +1,20 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import cors from 'cors'
 import dotenv from 'dotenv'
-import { handleErrors } from "./middlewares/error-handler-middleware";
+import { gamesRouter, participantsRouter } from "./routes";
+import { loadEnv } from "./config/env";
+import { handleErrors } from "./middlewares";
 
 const app = express();
 
-dotenv.config()
+loadEnv()
 
 app
     .use(express.json())
     .use(cors())
+    .get('/health', (_req, res) => res.send('OK!'))
+    .use('/participants', participantsRouter)
+    .use('/games', gamesRouter)
     .use(handleErrors);
 
 export default app

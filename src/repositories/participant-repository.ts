@@ -1,9 +1,8 @@
 import prisma from "../config/database";
 
-async function createParticipant(name: String, balance: Number){
+async function createParticipant(name: string, balance: number){
     const participant = await prisma.participant.create({
         data: {
-            updatedAt: new Date(),
             name,
             balance
         }
@@ -12,8 +11,10 @@ async function createParticipant(name: String, balance: Number){
     return participant
 }
 
-async function getParticipants(req: Request, res: Response){
+async function getParticipants(){
+    const participants = await prisma.participant.findMany();
     
+    return participants
 }
 
 const participantRepository = {
