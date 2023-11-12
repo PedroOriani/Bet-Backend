@@ -1,25 +1,32 @@
-import { NextFunction, Request, Response } from "express";
-import participantService from "../services/participant-service";
-import httpStatus from "http-status";
+import { NextFunction, Request, Response } from 'express';
+import httpStatus from 'http-status';
+import participantService from '../services/participant-service';
 
-async function createParticipant(req: Request, res: Response, next: NextFunction){
-    const { name, balance } = req.body
+async function createParticipant(req: Request, res: Response, next: NextFunction) {
+  const { name, balance } = req.body;
 
-    const participant = await participantService.createParticipant(name, Number(balance))
+  try {
+    const participant = await participantService.createParticipant(name, Number(balance));
 
-    res.status(httpStatus.CREATED).send(participant)
+    res.status(httpStatus.CREATED).send(participant);
+  } catch (err) {
+    next(err);
+  }
 }
 
-async function getParticipants(req: Request, res: Response, next: NextFunction){
-    
-    const participants = await participantService.getParticipants()
+async function getParticipants(req: Request, res: Response, next: NextFunction) {
+  try {
+    const participants = await participantService.getParticipants();
 
-    res.status(httpStatus.OK).send(participants)
+    res.status(httpStatus.OK).send(participants);
+  } catch (err) {
+    next(err);
+  }
 }
 
 const participantController = {
-    createParticipant,
-    getParticipants
-}
+  createParticipant,
+  getParticipants,
+};
 
-export default participantController
+export default participantController;

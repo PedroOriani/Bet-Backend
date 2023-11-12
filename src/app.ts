@@ -1,21 +1,20 @@
-import express, { Request, Response } from "express";
-import cors from 'cors'
-import dotenv from 'dotenv'
-import { betRouter, gamesRouter, participantsRouter } from "./routes";
-import { loadEnv } from "./config/env";
-import { handleErrors } from "./middlewares";
+import express from 'express';
+import cors from 'cors';
+import { betRouter, gamesRouter, participantsRouter } from './routes';
+import { loadEnv } from './config/env';
+import { handleErrors } from './middlewares';
 
 const app = express();
 
-loadEnv()
+loadEnv();
 
 app
-    .use(express.json())
-    .use(cors())
-    .get('/health', (_req, res) => res.send('OK!'))
-    .use('/participants', participantsRouter)
-    .use('/games', gamesRouter)
-    .use('/bets', betRouter)
-    .use(handleErrors);
+  .use(express.json())
+  .use(cors())
+  .get('/health', (_req, res) => res.send('OK!'))
+  .use('/participants', participantsRouter)
+  .use('/games', gamesRouter)
+  .use('/bets', betRouter)
+  .use(handleErrors);
 
-export default app
+export default app;

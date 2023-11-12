@@ -20,5 +20,4 @@
       "transform": "typescript-transform-paths"
     }
   ],
-  "include": ["src/**/*.ts"],
 }
