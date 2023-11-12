@@ -14,8 +14,24 @@ async function createBet(gameId: number, participantId: number, homeTeamScore: n
     return bet
 }
 
+async function updateBet(betId: number, result: string, amountWon: number){
+    const bet = await prisma.bet.update({
+        where: {
+            id: betId,
+        },
+        data: {
+            status: result,
+            amountWon: amountWon,
+            updatedAt: new Date(),
+        }
+    })
+
+    return bet
+}
+
 const betRepository = {
-    createBet
+    createBet,
+    updateBet
 }
 
 export default betRepository

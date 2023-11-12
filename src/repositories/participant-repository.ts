@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import prisma from "../config/database";
 
 async function createParticipant(name: string, balance: number){
@@ -33,11 +34,12 @@ async function updateParticipantBalance(participantId: number, newBalance: numbe
             id: participantId,
         },
         data: {
-            balance: newBalance
+            balance: newBalance,
+            updatedAt: new Date(),
         }
     })
 
-    return participantId
+    return participantUpdated
 }
 
 const participantRepository = {

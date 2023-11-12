@@ -11,8 +11,20 @@ async function createGame(homeTeamName: string, awayTeamName: string){
     return game
 }
 
-async function finishGame(){
-    
+async function finishGame(homeTeamScore: number, awayTeamScore: number, id: number){
+    const updatedGame = await prisma.game.update({
+        where: {
+            id: id
+        },
+        data: {
+            homeTeamScore: homeTeamScore,
+            awayTeamScore: awayTeamScore,
+            updatedAt: new Date(),
+            isFinished: true,
+        }
+    })
+
+    return updatedGame
 }
 
 async function getGames(){
@@ -35,12 +47,11 @@ async function getGameById(id: number){
     return game
 }
 
-
 const gameRepository = {
     createGame,
     finishGame,
     getGames,
-    getGameById
+    getGameById,
 }
 
 export default gameRepository

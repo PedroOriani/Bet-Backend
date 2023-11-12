@@ -15,7 +15,16 @@ async function createGame(req: Request, res: Response, next: NextFunction){
 }
 
 async function finishGame(req: Request, res: Response, next: NextFunction){
+    const { homeTeamScore, awayTeamScore } = req.body
+    const { id } = req.params
 
+    try{ 
+        const game = await gameService.finishGame(homeTeamScore, awayTeamScore, Number(id))
+
+        res.status(httpStatus.OK).send(game)
+    }catch(err){
+        next(err)
+    }
 }
 
 async function getGames(req: Request, res: Response, next: NextFunction){
