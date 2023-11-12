@@ -1,8 +1,8 @@
-import { ApplicationError } from "../protocols";
+import { ApplicationError } from '../protocols';
 
 export function badRequestError(message: string): ApplicationError {
-    return {
-      name: 'badRequestError',
-      message: `${message}`,
-    };
-  }
+  return {
+    name: 'badRequestError',
+    message: `${message}`,
+  };
+}

@@ -1,88 +1,88 @@
-import { badRequestError } from "src/errors"
-import { notFoundError } from "../errors/not-found-error"
-import gameRepository from "../repositories/game-repository"
-import betRepository from "src/repositories/bet-repository"
-import { Prisma, Bet } from "@prisma/client";
-import participantRepository from "src/repositories/participant-repository";
+import { Prisma, Bet } from '@prisma/client';
+import { notFoundError } from '../errors/not-found-error';
+import gameRepository from '../repositories/game-repository';
+import { badRequestError } from 'src/errors';
+import betRepository from 'src/repositories/bet-repository';
+import participantRepository from 'src/repositories/participant-repository';
 
 type GameWithBets = Prisma.GameGetPayload<{
-    include: { Bet: true };
-  }> & { Bet: Bet[] };
+  include: { Bet: true };
+}> & { Bet: Bet[] };
 
-async function createGame(homeTeamName: string, awayTeamName: string){
-    return await gameRepository.createGame(homeTeamName, awayTeamName)
+async function createGame(homeTeamName: string, awayTeamName: string) {
+  return await gameRepository.createGame(homeTeamName, awayTeamName);
 }
 
-async function finishGame(homeTeamScore: number, awayTeamScore: number, id: number){
-    const game = await gameRepository.getGameById(id)
+async function finishGame(homeTeamScore: number, awayTeamScore: number, id: number) {
+  const game = await gameRepository.getGameById(id);
 
-    if (!game) throw notFoundError()
+  if (!game) throw notFoundError();
 
-    if (game.isFinished === true) throw badRequestError('O jogo já foi finalizado');
+  if (game.isFinished === true) throw badRequestError('O jogo já foi finalizado');
 
-    const finishedGame = await gameRepository.finishGame(homeTeamScore, awayTeamScore, id);
+  const finishedGame = await gameRepository.finishGame(homeTeamScore, awayTeamScore, id);
 
-    await calculateWins(game, homeTeamScore, awayTeamScore)
+  await calculateWins(game, homeTeamScore, awayTeamScore);
 
-    return finishedGame
+  return finishedGame;
 }
 
-async function getGames(){
-    const games = await gameRepository.getGames()
+async function getGames() {
+  const games = await gameRepository.getGames();
 
-    if (games.length === 0) throw notFoundError()
+  if (games.length === 0) throw notFoundError();
 
-    return games
+  return games;
 }
 
-async function getGameById(id: number){
-    const game = await gameRepository.getGameById(id)
+async function getGameById(id: number) {
+  const game = await gameRepository.getGameById(id);
 
-    if (!game) throw notFoundError()
+  if (!game) throw notFoundError();
 
-    return game
+  return game;
 }
 
 async function calculateWins(game: GameWithBets, homeTeamScore: number, awayTeamScore: number) {
-    const wins = [];
+  const wins = [];
 
-    let totalBet = 0
+  let totalBet = 0;
 
-    let totalBetWon = 0
+  let totalBetWon = 0;
 
-    game.Bet.forEach(async(b) => {
+  game.Bet.forEach(async (b) => {
+    totalBet += b.amountBet;
 
-        totalBet += b.amountBet
+    if (b.homeTeamScore === homeTeamScore && b.awayTeamScore === awayTeamScore) {
+      wins.push(b);
 
-        if (b.homeTeamScore === homeTeamScore && b.awayTeamScore === awayTeamScore) {
+      totalBetWon += b.amountBet;
+    } else {
+      await betRepository.updateBet(b.id, 'LOST', 0);
+    }
+  });
 
-            wins.push(b)
+  wins.forEach(async (b) => {
+    const valueWon = (b.amountBet / totalBetWon) * totalBet * 0.7;
+    console.log(`${b.participantId} Won: ${valueWon}`);
 
-            totalBetWon += b.amountBet
-        }else {
-            await betRepository.updateBet(b.id, 'LOST', 0)
-        }
-    })
+    const updatedBet = await betRepository.updateBet(b.id, 'WON', valueWon);
+    console.log(updatedBet);
 
-    wins.forEach(async(b) => {
-        const valueWon = (b.amountBet/(totalBetWon)) * (totalBet) * (0.7)
-        console.log(`${b.participantId} Won: ${valueWon}`)
+    const participant = await participantRepository.getParticipantById(b.participantId);
 
-        const updatedBet = await betRepository.updateBet(b.id, 'WON', valueWon)
+    const newBalance = Math.floor(participant.balance + valueWon);
 
-        const participant = await participantRepository.getParticipantById(b.participantId)
-
-        const newBalance = Math.floor(participant.balance + valueWon)
-
-        const updatedBalance = await participantRepository.updateParticipantBalance(participant.id, newBalance)
-    })
+    const updatedBalance = await participantRepository.updateParticipantBalance(participant.id, newBalance);
+    console.log(updatedBalance);
+  });
 }
 
 const gameService = {
-    createGame,
-    finishGame,
-    getGames,
-    getGameById
-}
+  createGame,
+  finishGame,
+  getGames,
+  getGameById,
+};
 
-export default gameService
+export default gameService;
