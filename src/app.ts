@@ -1,8 +1,8 @@
 import express from 'express';
 import cors from 'cors';
-import { betRouter, gamesRouter, participantsRouter } from '@/routes';
-import { handleErrors } from '@/middlewares';
-import { loadEnv } from '@/config/env'
+import { betRouter, gamesRouter, participantsRouter } from './routes';
+import { handleErrors } from './middlewares';
+import { loadEnv } from './config/env'
 
 
 

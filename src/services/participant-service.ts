@@ -1,4 +1,4 @@
-import participantRepository from "@/repositories/participant-repository";
+import participantRepository from "../repositories/participant-repository";
 
 
 async function createParticipant(name: string, balance: number) {

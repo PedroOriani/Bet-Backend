@@ -1,8 +1,8 @@
 import { Prisma, Bet } from '@prisma/client';
-import { badRequestError, notFoundError } from '@/errors';
-import betRepository from '@/repositories/bet-repository';
-import participantRepository from '@/repositories/participant-repository';
-import gameRepository from '@/repositories/game-repository';
+import { badRequestError, notFoundError } from '../errors';
+import betRepository from '../repositories/bet-repository';
+import participantRepository from '../repositories/participant-repository';
+import gameRepository from '../repositories/game-repository';
 
 
 type GameWithBets = Prisma.GameGetPayload<{

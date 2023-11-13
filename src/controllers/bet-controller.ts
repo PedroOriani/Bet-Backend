@@ -1,4 +1,4 @@
-import betService from '@/services/bet-service';
+import betService from '../services/bet-service';
 import { NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status';
 

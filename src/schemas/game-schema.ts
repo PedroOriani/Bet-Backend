@@ -1,4 +1,4 @@
-import { inputGameBody } from '@/protocols';
+import { inputGameBody } from '../protocols';
 import Joi from 'joi';
 
 export const gameSchema = Joi.object<inputGameBody>({

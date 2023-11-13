@@ -1,4 +1,4 @@
-import { inputParticipantBody } from '@/protocols';
+import { inputParticipantBody } from '../protocols';
 import Joi from 'joi';
 
 export const participantSchema = Joi.object<inputParticipantBody>({

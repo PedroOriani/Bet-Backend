@@ -1,4 +1,4 @@
-import gameService from '@/services/game-service';
+import gameService from '../services/game-service';
 import { NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status';
 

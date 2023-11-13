@@ -1,4 +1,4 @@
-import participantService from '@/services/participant-service';
+import participantService from '../services/participant-service';
 import { NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status';
 
