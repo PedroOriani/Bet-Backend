@@ -12,6 +12,7 @@ describe("GET /participants", () => {
     beforeEach(async() => {
         await prisma.bet.deleteMany()
         await prisma.participant.deleteMany()
+        await prisma.game.deleteMany()
     })
 
     it("Should return status 200 and an object", async() => {
@@ -30,6 +31,7 @@ describe("POST /participants", () => {
     beforeEach(async() => {
         await prisma.bet.deleteMany()
         await prisma.participant.deleteMany()
+        await prisma.game.deleteMany()
     })
 
     it("Should return status 422 for invalid data", async() => {

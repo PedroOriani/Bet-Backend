@@ -43,7 +43,7 @@ async function finishGame(homeTeamScore: number, awayTeamScore: number, id: numb
 async function getGames() {
   const games = await gameRepository.getGames();
 
-  if (games.length === 0) throw notFoundError();
+  if (games.length === 0) throw badRequestError('Não tem jogos cadastrados');
 
   return games;
 }
