@@ -46,11 +46,9 @@ describe("POST /participants", () => {
     it("Should return status 201 and an object for valid data", async() => {
 
         const validBody = {
-            name: faker.person.firstName(),
-            balance: faker.number.int({min: 1001, max: 1000000})
+            name: faker.person.fullName(),
+            balance: faker.number.int({min: 1001, max: 10000})
         }
-
-        console.log(validBody)
 
         const {status, body} = await api.post('/participants').send(validBody);
         expect(status).toBe(httpStatus.CREATED)

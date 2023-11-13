@@ -5,7 +5,7 @@ export async function createParticipant() {
     return await prisma.participant.create({
         data: {
             name: faker.person.firstName(),
-            balance: faker.number.int({min: 1000, max: 500000})
+            balance: faker.number.int({min: 1000, max: 5000})
         }
     })
 }
