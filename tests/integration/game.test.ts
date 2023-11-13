@@ -4,7 +4,7 @@ import prisma from "../../src/config/database";
 import { createParticipant } from "../factories/participant-factory";
 import { faker } from '@faker-js/faker';
 import httpStatus from "http-status";
-import { createGame } from "../factories/game-factory";
+import { createFinishedGame, createGame } from "../factories/game-factory";
 import { createBet } from "../factories/bet-factory";
 
 const api = supertest(app)
@@ -113,4 +113,65 @@ describe("GET /games/:id", () => {
                 amountWon: null, // nulo quando a aposta ainda está PENDING; number caso a aposta já esteja WON ou LOST, com o valor ganho representado em centavos
             }]})
     })
+})
+
+describe("POST /games/:id/finish", () => {
+
+    beforeEach(async() => {
+        await prisma.bet.deleteMany()
+        await prisma.game.deleteMany()
+        await prisma.participant.deleteMany()
+    })
+
+    it("Should return status 400 when gameId doesnt exist", async() => {
+
+        const invalidBody = {
+            homeTeamScore: faker.number.int({min: 1, max: 10}),
+            awayTeamScore: faker.number.int({min: 1, max: 10}),
+        }
+
+        const {status, text} = await api.post(`/games/1/finish`).send(invalidBody);
+        expect(status).toBe(httpStatus.NOT_FOUND)
+    })
+
+    it("Should return status 400 when game is finished", async() => {
+
+        const game = await createFinishedGame()
+
+        const validBody = {
+            homeTeamScore: faker.number.int({min: 1, max: 10}),
+            awayTeamScore: faker.number.int({min: 1, max: 10}),
+        }
+
+        const {status, text} = await api.post(`/games/${game.id}/finish`).send(validBody);
+        expect(status).toBe(httpStatus.BAD_REQUEST)
+        expect(text).toBe("{\"message\":\"O jogo já foi finalizado\"}")
+    })
+
+
+    it("Should return status 201 and return a object when there is a valid data", async() => {
+
+        const game = await createGame();
+
+        const validBody = {
+            homeTeamScore: faker.number.int({min: 1, max: 10}),
+            awayTeamScore: faker.number.int({min: 1, max: 10}),
+        }
+
+        console.log(validBody)
+
+        const {status, body} = await api.post(`/games/${game.id}/finish`).send(validBody);
+        expect(status).toBe(httpStatus.OK)
+        expect(body).toEqual({
+            id: expect.any(Number),
+            createdAt: expect.any(String),
+            updatedAt: expect.any(String),
+            homeTeamName: game.homeTeamName,
+            awayTeamName: game.awayTeamName,
+            homeTeamScore: validBody.homeTeamScore,
+            awayTeamScore: validBody.awayTeamScore,
+            isFinished: true
+        })
+    })
+
 })
