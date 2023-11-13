@@ -1,7 +1,8 @@
+import betController from '@/controllers/bet-controller';
+import { validateSchema } from '@/middlewares';
+import { betSchema } from '@/schemas';
 import { Router } from 'express';
-import betController from 'src/controllers/bet-controller';
-import { validateSchema } from 'src/middlewares';
-import { betSchema } from 'src/schemas';
+
 
 const betRouter = Router();
 

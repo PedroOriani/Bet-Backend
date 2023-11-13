@@ -1,6 +1,6 @@
+import participantService from '@/services/participant-service';
 import { NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status';
-import participantService from '../services/participant-service';
 
 async function createParticipant(req: Request, res: Response, next: NextFunction) {
   const { name, balance } = req.body;

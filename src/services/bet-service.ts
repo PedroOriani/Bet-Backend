@@ -1,7 +1,8 @@
-import { badRequestError } from 'src/errors';
-import betRepository from 'src/repositories/bet-repository';
-import gameRepository from 'src/repositories/game-repository';
-import participantRepository from 'src/repositories/participant-repository';
+import { badRequestError } from "@/errors";
+import betRepository from "@/repositories/bet-repository";
+import gameRepository from "@/repositories/game-repository";
+import participantRepository from "@/repositories/participant-repository";
+
 
 async function createBet(
   gameId: number,

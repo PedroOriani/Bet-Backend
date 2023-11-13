@@ -1,13 +1,26 @@
 import { Prisma, Bet } from '@prisma/client';
-import { notFoundError } from '../errors/not-found-error';
-import gameRepository from '../repositories/game-repository';
-import { badRequestError } from 'src/errors';
-import betRepository from 'src/repositories/bet-repository';
-import participantRepository from 'src/repositories/participant-repository';
+import { badRequestError, notFoundError } from '@/errors';
+import betRepository from '@/repositories/bet-repository';
+import participantRepository from '@/repositories/participant-repository';
+import gameRepository from '@/repositories/game-repository';
+
 
 type GameWithBets = Prisma.GameGetPayload<{
   include: { Bet: true };
 }> & { Bet: Bet[] };
+
+type bet = {
+  id: number;
+  createdAt: Date;
+  updatedAt: Date;
+  homeTeamScore: number;
+  awayTeamScore: number;
+  amountBet: number;
+  gameId: number;
+  participantId: number;
+  status: string;
+  amountWon: number;
+}
 
 async function createGame(homeTeamName: string, awayTeamName: string) {
   return await gameRepository.createGame(homeTeamName, awayTeamName);
@@ -44,13 +57,13 @@ async function getGameById(id: number) {
 }
 
 async function calculateWins(game: GameWithBets, homeTeamScore: number, awayTeamScore: number) {
-  const wins = [];
+  const wins: bet[] = [];
 
   let totalBet = 0;
 
   let totalBetWon = 0;
 
-  game.Bet.forEach(async (b) => {
+  game.Bet.forEach(async (b: bet) => {
     totalBet += b.amountBet;
 
     if (b.homeTeamScore === homeTeamScore && b.awayTeamScore === awayTeamScore) {

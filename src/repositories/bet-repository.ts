@@ -1,4 +1,5 @@
-import prisma from 'src/config/database';
+import prisma from "@/config/database";
+
 
 async function createBet(
   gameId: number,

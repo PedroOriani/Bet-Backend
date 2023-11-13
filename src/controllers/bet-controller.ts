@@ -1,6 +1,7 @@
+import betService from '@/services/bet-service';
 import { NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status';
-import betService from 'src/services/bet-service';
+
 
 async function createBet(req: Request, res: Response, next: NextFunction) {
   const { gameId, participantId, homeTeamScore, awayTeamScore, amountBet } = req.body;
