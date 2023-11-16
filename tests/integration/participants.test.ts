@@ -1,66 +1,60 @@
-import supertest from "supertest";
-import app from "../../src/app";
-import prisma from "../../src/config/database";
-import { createParticipant } from "../factories/participant-factory";
+import supertest from 'supertest';
 import { faker } from '@faker-js/faker';
-import httpStatus from "http-status";
+import httpStatus from 'http-status';
+import app from '../../src/app';
+import prisma from '../../src/config/database';
+import { createParticipant } from '../factories/participant-factory';
 
-const api = supertest(app)
+const api = supertest(app);
 
-describe("GET /participants", () => {
+describe('GET /participants', () => {
+  beforeEach(async () => {
+    await prisma.bet.deleteMany();
+    await prisma.participant.deleteMany();
+    await prisma.game.deleteMany();
+  });
 
-    beforeEach(async() => {
-        await prisma.bet.deleteMany()
-        await prisma.participant.deleteMany()
-        await prisma.game.deleteMany()
-    })
+  it('Should return status 200 and an object', async () => {
+    await createParticipant();
+    await createParticipant();
 
-    it("Should return status 200 and an object", async() => {
+    const { status, body } = await api.get('/participants');
+    expect(status).toBe(httpStatus.OK);
+    expect(body).toHaveLength(2);
+  });
+});
 
-        await createParticipant()
-        await createParticipant()
+describe('POST /participants', () => {
+  beforeEach(async () => {
+    await prisma.bet.deleteMany();
+    await prisma.participant.deleteMany();
+    await prisma.game.deleteMany();
+  });
 
-        const {status, body} = await api.get('/participants');
-        expect(status).toBe(httpStatus.OK)
-        expect(body).toHaveLength(2);
-    })
-})
+  it('Should return status 422 for invalid data', async () => {
+    const invalidBody = {
+      name: faker.person.firstName(),
+      balance: faker.number.int({ max: 999 }),
+    };
 
-describe("POST /participants", () => {
+    const { status } = await api.post('/participants').send(invalidBody);
+    expect(status).toBe(httpStatus.UNPROCESSABLE_ENTITY);
+  });
 
-    beforeEach(async() => {
-        await prisma.bet.deleteMany()
-        await prisma.participant.deleteMany()
-        await prisma.game.deleteMany()
-    })
+  it('Should return status 201 and an object for valid data', async () => {
+    const validBody = {
+      name: faker.person.fullName(),
+      balance: faker.number.int({ min: 1001, max: 10000 }),
+    };
 
-    it("Should return status 422 for invalid data", async() => {
-
-        const invalidBody = {
-            name: faker.person.firstName(),
-            balance: faker.number.int({max: 999})
-        }
-
-        const {status} = await api.post('/participants').send(invalidBody);
-        expect(status).toBe(httpStatus.UNPROCESSABLE_ENTITY)
-    })
-
-    it("Should return status 201 and an object for valid data", async() => {
-
-        const validBody = {
-            name: faker.person.fullName(),
-            balance: faker.number.int({min: 1001, max: 10000})
-        }
-
-        const {status, body} = await api.post('/participants').send(validBody);
-        expect(status).toBe(httpStatus.CREATED)
-        expect(body).toEqual({
-            id: expect.any(Number),
-            name: expect.any(String),
-            balance: expect.any(Number),
-            createdAt: expect.any(String),
-            updatedAt: expect.any(String),
-        })
-    })
-})
-
+    const { status, body } = await api.post('/participants').send(validBody);
+    expect(status).toBe(httpStatus.CREATED);
+    expect(body).toEqual({
+      id: expect.any(Number),
+      name: expect.any(String),
+      balance: expect.any(Number),
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String),
+    });
+  });
+});

@@ -1,4 +1,4 @@
-import prisma from "../config/database";
+import prisma from '../config/database';
 
 async function createGame(homeTeamName: string, awayTeamName: string) {
   const game = await prisma.game.create({

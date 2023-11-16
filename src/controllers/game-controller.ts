@@ -1,7 +1,6 @@
-import gameService from '../services/game-service';
 import { NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status';
-
+import gameService from '../services/game-service';
 
 async function createGame(req: Request, res: Response, next: NextFunction) {
   const { homeTeamName, awayTeamName } = req.body;

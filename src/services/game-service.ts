@@ -4,7 +4,6 @@ import betRepository from '../repositories/bet-repository';
 import participantRepository from '../repositories/participant-repository';
 import gameRepository from '../repositories/game-repository';
 
-
 type GameWithBets = Prisma.GameGetPayload<{
   include: { Bet: true };
 }> & { Bet: Bet[] };
@@ -20,7 +19,7 @@ type bet = {
   participantId: number;
   status: string;
   amountWon: number;
-}
+};
 
 async function createGame(homeTeamName: string, awayTeamName: string) {
   return await gameRepository.createGame(homeTeamName, awayTeamName);

@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status';
 
-export function handleErrors(err: Error, _req: Request, res: Response, _next: NextFunction) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function handleErrors(err: Error, _req: Request, res: Response, next: NextFunction) {
   if (err.name === 'NotFoundError') {
     return res.status(httpStatus.NOT_FOUND).send({
       message: err.message,
