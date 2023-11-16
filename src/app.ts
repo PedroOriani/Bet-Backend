@@ -2,9 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import { betRouter, gamesRouter, participantsRouter } from './routes';
 import { handleErrors } from './middlewares';
-import { loadEnv } from './config/env'
-
-
+import { loadEnv } from './config/env';
+import 'express-async-errors';
 
 const app = express();
 

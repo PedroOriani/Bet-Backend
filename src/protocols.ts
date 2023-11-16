@@ -1,14 +1,14 @@
-export type inputParticipantBody = {
+export type InputParticipantBody = {
   name: string;
   balance: number;
 };
 
-export type inputGameBody = {
+export type InputGameBody = {
   homeTeamName: string;
   awayTeamName: string;
 };
 
-export type inputBetBody = {
+export type InputBetBody = {
   homeTeamScore: number;
   awayTeamScore: number;
   amountBet: number;
