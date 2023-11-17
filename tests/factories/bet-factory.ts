@@ -14,3 +14,13 @@ export async function createBet(gameId: number, participantId: number, amountBet
 
   return bet;
 }
+
+export async function getBetById(id: number) {
+  const bet = await prisma.bet.findUnique({
+    where: {
+      id,
+    },
+  });
+
+  return bet;
+}

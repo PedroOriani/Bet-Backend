@@ -5,7 +5,7 @@ import app from '../../src/app';
 import prisma from '../../src/config/database';
 import { createParticipant } from '../factories/participant-factory';
 import { createFinishedGame, createGame } from '../factories/game-factory';
-import { createBet } from '../factories/bet-factory';
+import { createBet, getBetById } from '../factories/bet-factory';
 
 const api = supertest(app);
 
@@ -160,6 +160,35 @@ describe('POST /games/:id/finish', () => {
       homeTeamScore: validBody.homeTeamScore,
       awayTeamScore: validBody.awayTeamScore,
       isFinished: true,
+    });
+  });
+
+  it('Should update bet when there is a valid data and the score is correct', async () => {
+    const participant = await createParticipant();
+    const game = await createGame();
+    const bet = await createBet(game.id, participant.id, participant.balance - 100);
+
+    const validBody = {
+      homeTeamScore: bet.homeTeamScore,
+      awayTeamScore: bet.awayTeamScore,
+    };
+
+    const { status } = await api.post(`/games/${game.id}/finish`).send(validBody);
+    expect(status).toBe(httpStatus.OK);
+
+    const betUpdated = await getBetById(bet.id);
+
+    expect(betUpdated).toEqual({
+      id: expect.any(Number),
+      createdAt: expect.any(Date),
+      updatedAt: expect.any(Date),
+      homeTeamScore: validBody.homeTeamScore,
+      awayTeamScore: validBody.awayTeamScore,
+      amountBet: bet.amountBet,
+      gameId: game.id,
+      participantId: participant.id,
+      status: 'WON',
+      amountWon: Math.floor(bet.amountBet * 0.7),
     });
   });
 });

@@ -112,8 +112,6 @@ describe('POST /bets', () => {
     const participant = await createParticipant();
     const game = await createGame();
 
-    console.log(participant);
-
     const validBody = {
       gameId: game.id,
       participantId: participant.id,
