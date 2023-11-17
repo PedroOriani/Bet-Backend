@@ -80,7 +80,7 @@ describe('POST /bets', () => {
     expect(text).toBe('{"message":"Saldo insuficiente"}');
   });
 
-  it('Should return status 201 when return an object when there is a valid data', async () => {
+  it('Should return status 201 and return an object when there is a valid data', async () => {
     const participant = await createParticipant();
     const game = await createGame();
 
@@ -106,5 +106,28 @@ describe('POST /bets', () => {
       status: 'PENDING',
       amountWon: null,
     });
+  });
+
+  it('Should withdraw the amountBet from participant balance when there is a valid data', async () => {
+    const participant = await createParticipant();
+    const game = await createGame();
+
+    console.log(participant);
+
+    const validBody = {
+      gameId: game.id,
+      participantId: participant.id,
+      homeTeamScore: faker.number.int({ min: 1, max: 10 }),
+      awayTeamScore: faker.number.int({ min: 1, max: 10 }),
+      amountBet: participant.balance - 1000,
+    };
+
+    const { status } = await api.post('/bets').send(validBody);
+    const { body } = await api.get('/participants');
+
+    console.log(body);
+
+    expect(status).toBe(httpStatus.CREATED);
+    expect(body[0].balance).toBe(1000);
   });
 });
