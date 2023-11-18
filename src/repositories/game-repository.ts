@@ -39,7 +39,7 @@ async function getGameById(id: number) {
       id,
     },
     include: {
-      Bet: true,
+      bets: true,
     },
   });
 

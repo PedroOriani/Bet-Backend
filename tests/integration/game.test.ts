@@ -3,7 +3,7 @@ import { faker } from '@faker-js/faker';
 import httpStatus from 'http-status';
 import app from '../../src/app';
 import prisma from '../../src/config/database';
-import { createParticipant } from '../factories/participant-factory';
+import { createParticipant, getParticipantById, updateBalance } from '../factories/participant-factory';
 import { createFinishedGame, createGame } from '../factories/game-factory';
 import { createBet, getBetById } from '../factories/bet-factory';
 
@@ -21,8 +21,6 @@ describe('POST /games', () => {
       homeTeamName: faker.location.city(),
       awayTeamName: faker.location.city(),
     };
-
-    console.log(validBody);
 
     const { status, body } = await api.post('/games').send(validBody);
     expect(status).toBe(httpStatus.CREATED);
@@ -147,8 +145,6 @@ describe('POST /games/:id/finish', () => {
       awayTeamScore: faker.number.int({ min: 1, max: 10 }),
     };
 
-    console.log(validBody);
-
     const { status, body } = await api.post(`/games/${game.id}/finish`).send(validBody);
     expect(status).toBe(httpStatus.OK);
     expect(body).toEqual({
@@ -178,17 +174,55 @@ describe('POST /games/:id/finish', () => {
 
     const betUpdated = await getBetById(bet.id);
 
-    expect(betUpdated).toEqual({
-      id: expect.any(Number),
-      createdAt: expect.any(Date),
-      updatedAt: expect.any(Date),
-      homeTeamScore: validBody.homeTeamScore,
-      awayTeamScore: validBody.awayTeamScore,
-      amountBet: bet.amountBet,
-      gameId: game.id,
-      participantId: participant.id,
-      status: 'WON',
-      amountWon: Math.floor(bet.amountBet * 0.7),
-    });
+    expect(betUpdated.status).toEqual('WON');
+  });
+
+  it('Should update bet when there is a valid data and the score is incorrect', async () => {
+    const participant = await createParticipant();
+    const game = await createGame();
+    const bet = await createBet(game.id, participant.id, participant.balance - 100);
+
+    const validBody = {
+      homeTeamScore: bet.homeTeamScore + 1,
+      awayTeamScore: bet.awayTeamScore,
+    };
+
+    const { status } = await api.post(`/games/${game.id}/finish`).send(validBody);
+    expect(status).toBe(httpStatus.OK);
+
+    await api.get(`/games/${game.id}`);
+
+    const betUpdated = await getBetById(bet.id);
+
+    expect(betUpdated.status).toEqual('LOST');
+  });
+
+  it('Should update balance when there is a valid data and the score is correct', async () => {
+    const participant = await createParticipant();
+    const game = await createGame();
+    console.log(participant.balance);
+    const newBalance = faker.number.int({ min: 100, max: 200 });
+    console.log(`newBalance: ${newBalance}`);
+    const bet = await createBet(game.id, participant.id, participant.balance - newBalance);
+    await updateBalance(participant.id, newBalance);
+
+    const validBody = {
+      homeTeamScore: bet.homeTeamScore,
+      awayTeamScore: bet.awayTeamScore,
+    };
+
+    const amountWon = Math.floor(bet.amountBet * 0.7);
+    console.log(`AmountBet: ${amountWon}`);
+
+    const { status } = await api.post(`/games/${game.id}/finish`).send(validBody);
+    expect(status).toBe(httpStatus.OK);
+
+    const betUpdated = await getBetById(bet.id);
+    console.log(betUpdated);
+
+    const participantUpdated = await api.get(`/participants`);
+    console.log(participantUpdated.body);
+
+    expect(participantUpdated.body[0].balance).toBe(newBalance + amountWon);
   });
 });

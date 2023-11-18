@@ -9,3 +9,24 @@ export async function createParticipant() {
     },
   });
 }
+
+export async function getParticipantById(id: number) {
+  const participant = await prisma.participant.findUnique({
+    where: {
+      id,
+    },
+  });
+
+  return participant;
+}
+
+export async function updateBalance(id: number, balance: number) {
+  return await prisma.participant.update({
+    where: {
+      id,
+    },
+    data: {
+      balance: balance,
+    },
+  });
+}

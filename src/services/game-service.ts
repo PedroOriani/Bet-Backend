@@ -5,21 +5,8 @@ import participantRepository from '../repositories/participant-repository';
 import gameRepository from '../repositories/game-repository';
 
 type GameWithBets = Prisma.GameGetPayload<{
-  include: { Bet: true };
-}> & { Bet: Bet[] };
-
-type bet = {
-  id: number;
-  createdAt: Date;
-  updatedAt: Date;
-  homeTeamScore: number;
-  awayTeamScore: number;
-  amountBet: number;
-  gameId: number;
-  participantId: number;
-  status: string;
-  amountWon: number;
-};
+  include: { bets: true };
+}> & { bets: Bet[] };
 
 async function createGame(homeTeamName: string, awayTeamName: string) {
   return await gameRepository.createGame(homeTeamName, awayTeamName);
@@ -56,13 +43,13 @@ async function getGameById(id: number) {
 }
 
 async function calculateWins(game: GameWithBets, homeTeamScore: number, awayTeamScore: number) {
-  const wins: bet[] = [];
+  const wins: Bet[] = [];
 
   let totalBet = 0;
 
   let totalBetWon = 0;
 
-  game.Bet.forEach(async (b: bet) => {
+  game.bets.forEach(async (b: Bet) => {
     totalBet += b.amountBet;
 
     if (b.homeTeamScore === homeTeamScore && b.awayTeamScore === awayTeamScore) {
@@ -74,19 +61,22 @@ async function calculateWins(game: GameWithBets, homeTeamScore: number, awayTeam
     }
   });
 
-  wins.forEach(async (b) => {
-    const valueWon = (b.amountBet / totalBetWon) * totalBet * 0.7;
-    console.log(`${b.participantId} Won: ${valueWon}`);
+  await updateBetAndBalance(wins, totalBet, totalBetWon);
+}
 
-    const updatedBet = await betRepository.updateBet(b.id, 'WON', valueWon);
-    console.log(updatedBet);
+async function updateBetAndBalance(wins: Bet[], totalBet: number, totalBetWon: number) {
+  const fee = 0.3;
+
+  wins.forEach(async (b) => {
+    const valueWon = (b.amountBet / totalBetWon) * totalBet * (1 - fee);
+
+    await betRepository.updateBet(b.id, 'WON', valueWon);
 
     const participant = await participantRepository.getParticipantById(b.participantId);
 
     const newBalance = Math.floor(participant.balance + valueWon);
 
-    const updatedBalance = await participantRepository.updateParticipantBalance(participant.id, newBalance);
-    console.log(updatedBalance);
+    await participantRepository.updateParticipantBalance(participant.id, newBalance);
   });
 }
 

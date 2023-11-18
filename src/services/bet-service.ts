@@ -22,9 +22,7 @@ async function createBet(
 
   const newBalance = participant.balance - amountBet;
 
-  const participantUpdated = await participantRepository.updateParticipantBalance(participantId, newBalance);
-
-  console.log(participantUpdated);
+  await participantRepository.updateParticipantBalance(participantId, newBalance);
 
   return bet;
 }

@@ -121,9 +121,8 @@ describe('POST /bets', () => {
     };
 
     const { status } = await api.post('/bets').send(validBody);
-    const { body } = await api.get('/participants');
 
-    console.log(body);
+    const { body } = await api.get('/participants');
 
     expect(status).toBe(httpStatus.CREATED);
     expect(body[0].balance).toBe(1000);

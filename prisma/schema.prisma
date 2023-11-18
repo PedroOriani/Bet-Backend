@@ -16,7 +16,7 @@ model Participant {
   updatedAt  DateTime     @default(now())
   name       String
   balance    Int
-  Bet        Bet[]
+  bets        Bet[]
 }
 
 model Game {
@@ -28,7 +28,7 @@ model Game {
 	homeTeamScore   Int          @default(0)
 	awayTeamScore   Int          @default(0)
 	isFinished      Boolean      @default(false)
-  Bet             Bet[]
+  bets             Bet[]
 }
 
 model Bet {
