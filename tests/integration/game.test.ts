@@ -5,7 +5,7 @@ import app from '../../src/app';
 import prisma from '../../src/config/database';
 import { createParticipant, getParticipantById, updateBalance } from '../factories/participant-factory';
 import { createFinishedGame, createGame } from '../factories/game-factory';
-import { createBet, getBetById } from '../factories/bet-factory';
+import { createBet, createBetWithScores, getBetById } from '../factories/bet-factory';
 
 const api = supertest(app);
 
@@ -89,7 +89,7 @@ describe('GET /games/:id', () => {
       homeTeamScore: game.homeTeamScore,
       awayTeamScore: game.awayTeamScore,
       isFinished: false,
-      Bet: [
+      bets: [
         {
           id: bet.id,
           createdAt: expect.any(String),
@@ -172,6 +172,8 @@ describe('POST /games/:id/finish', () => {
     const { status } = await api.post(`/games/${game.id}/finish`).send(validBody);
     expect(status).toBe(httpStatus.OK);
 
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
     const betUpdated = await getBetById(bet.id);
 
     expect(betUpdated.status).toEqual('WON');
@@ -190,7 +192,7 @@ describe('POST /games/:id/finish', () => {
     const { status } = await api.post(`/games/${game.id}/finish`).send(validBody);
     expect(status).toBe(httpStatus.OK);
 
-    await api.get(`/games/${game.id}`);
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     const betUpdated = await getBetById(bet.id);
 
@@ -200,9 +202,7 @@ describe('POST /games/:id/finish', () => {
   it('Should update balance when there is a valid data and the score is correct', async () => {
     const participant = await createParticipant();
     const game = await createGame();
-    console.log(participant.balance);
     const newBalance = faker.number.int({ min: 100, max: 200 });
-    console.log(`newBalance: ${newBalance}`);
     const bet = await createBet(game.id, participant.id, participant.balance - newBalance);
     await updateBalance(participant.id, newBalance);
 
@@ -210,19 +210,91 @@ describe('POST /games/:id/finish', () => {
       homeTeamScore: bet.homeTeamScore,
       awayTeamScore: bet.awayTeamScore,
     };
-
     const amountWon = Math.floor(bet.amountBet * 0.7);
-    console.log(`AmountBet: ${amountWon}`);
-
     const { status } = await api.post(`/games/${game.id}/finish`).send(validBody);
-    expect(status).toBe(httpStatus.OK);
-
-    const betUpdated = await getBetById(bet.id);
-    console.log(betUpdated);
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     const participantUpdated = await api.get(`/participants`);
-    console.log(participantUpdated.body);
-
+    expect(status).toBe(httpStatus.OK);
     expect(participantUpdated.body[0].balance).toBe(newBalance + amountWon);
+  });
+
+  it('must update the balance of the participant who got the result correct (1 correct & 1 wrong)', async () => {
+    const participantCorrect = await createParticipant();
+    const participantWrong = await createParticipant();
+    const game = await createGame();
+    const newBalance = faker.number.int({ min: 100, max: 200 });
+    const betCorrect = await createBet(game.id, participantCorrect.id, participantWrong.balance - newBalance);
+    const betWrong = await createBet(game.id, participantWrong.id, participantWrong.balance - newBalance);
+    await updateBalance(participantCorrect.id, newBalance);
+    await updateBalance(participantWrong.id, newBalance);
+
+    const validBody = {
+      homeTeamScore: betCorrect.homeTeamScore,
+      awayTeamScore: betCorrect.awayTeamScore,
+    };
+
+    const amountWon = Math.floor(
+      (betCorrect.amountBet / betCorrect.amountBet) * (betCorrect.amountBet + betWrong.amountBet) * 0.7,
+    );
+
+    await api.post(`/games/${game.id}/finish`).send(validBody);
+
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    const participantCorrectUpdated = await getParticipantById(participantCorrect.id);
+    const participantWrongUpdated = await getParticipantById(participantWrong.id);
+    expect(participantCorrectUpdated.balance).toBe(newBalance + amountWon);
+    expect(participantWrongUpdated.balance).toBe(newBalance);
+  });
+
+  it('must update the balance of the participant who got the result correct (2 corrects)', async () => {
+    const participantOne = await createParticipant();
+    const participantTwo = await createParticipant();
+    const game = await createGame();
+    const newBalance = faker.number.int({ min: 100, max: 200 });
+    const betOne = await createBet(game.id, participantOne.id, participantOne.balance - newBalance);
+    const betTwo = await createBetWithScores(
+      game.id,
+      participantTwo.id,
+      participantTwo.balance - newBalance,
+      betOne.homeTeamScore,
+      betOne.awayTeamScore,
+    );
+
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await updateBalance(participantOne.id, newBalance);
+    await updateBalance(participantTwo.id, newBalance);
+
+    const validBody = {
+      homeTeamScore: betOne.homeTeamScore,
+      awayTeamScore: betOne.awayTeamScore,
+    };
+
+    // console.log(betOne.amountBet)
+    // console.log(betTwo.amountBet)
+    // console.log(`newBalance: ${newBalance}`)
+    // console.log(`participantOne: ${participantOne.balance}`)
+
+    const amountWonOne = Math.floor(
+      (betOne.amountBet / (betOne.amountBet + betTwo.amountBet)) * (betOne.amountBet + betTwo.amountBet) * 0.7,
+    );
+    const amountWonTwo = Math.floor(
+      (betTwo.amountBet / (betOne.amountBet + betTwo.amountBet)) * (betOne.amountBet + betTwo.amountBet) * 0.7,
+    );
+
+    // console.log(`amountWonOne: ${amountWonOne}`);
+    // console.log(`amountWonTwo: ${amountWonTwo}`)
+
+    await api.post(`/games/${game.id}/finish`).send(validBody);
+
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    const participantOneUpdated = await getParticipantById(participantOne.id);
+    const participantTwoUpdated = await getParticipantById(participantTwo.id);
+
+    // console.log(`participantOneUpdated: ${participantOneUpdated.balance}`);
+    expect(participantOneUpdated.balance).toBe(newBalance + amountWonOne);
+    expect(participantTwoUpdated.balance).toBe(newBalance + amountWonTwo);
   });
 });

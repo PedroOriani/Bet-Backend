@@ -15,6 +15,26 @@ export async function createBet(gameId: number, participantId: number, amountBet
   return bet;
 }
 
+export async function createBetWithScores(
+  gameId: number,
+  participantId: number,
+  amountBet: number,
+  homeTeamScore: number,
+  awayTeamScore: number,
+) {
+  const bet = await prisma.bet.create({
+    data: {
+      homeTeamScore: homeTeamScore,
+      awayTeamScore: awayTeamScore,
+      amountBet: amountBet,
+      gameId: gameId,
+      participantId: participantId,
+    },
+  });
+
+  return bet;
+}
+
 export async function getBetById(id: number) {
   const bet = await prisma.bet.findUnique({
     where: {

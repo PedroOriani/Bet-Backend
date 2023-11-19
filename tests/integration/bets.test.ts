@@ -63,6 +63,22 @@ describe('POST /bets', () => {
     expect(text).toBe('{"message":"Participante não encontrado"}');
   });
 
+  it('Should return status 422 when amountBet is less than 100', async () => {
+    const participant = await createParticipant();
+    const game = await createGame();
+
+    const invalidBody = {
+      gameId: game.id,
+      participantId: faker.number.int({ min: 1, max: 10 }),
+      homeTeamScore: faker.number.int({ min: 1, max: 10 }),
+      awayTeamScore: faker.number.int({ min: 1, max: 10 }),
+      amountBet: faker.number.int({ max: 99 }),
+    };
+
+    const { status } = await api.post('/bets').send(invalidBody);
+    expect(status).toBe(httpStatus.UNPROCESSABLE_ENTITY);
+  });
+
   it('Should return status 400 when amountBet is less than balance', async () => {
     const participant = await createParticipant();
     const game = await createGame();
@@ -89,7 +105,7 @@ describe('POST /bets', () => {
       participantId: participant.id,
       homeTeamScore: faker.number.int({ min: 1, max: 10 }),
       awayTeamScore: faker.number.int({ min: 1, max: 10 }),
-      amountBet: participant.balance - 1000,
+      amountBet: participant.balance - 900,
     };
 
     const { status, body } = await api.post('/bets').send(validBody);
@@ -117,7 +133,7 @@ describe('POST /bets', () => {
       participantId: participant.id,
       homeTeamScore: faker.number.int({ min: 1, max: 10 }),
       awayTeamScore: faker.number.int({ min: 1, max: 10 }),
-      amountBet: participant.balance - 1000,
+      amountBet: participant.balance - 900,
     };
 
     const { status } = await api.post('/bets').send(validBody);
@@ -125,6 +141,6 @@ describe('POST /bets', () => {
     const { body } = await api.get('/participants');
 
     expect(status).toBe(httpStatus.CREATED);
-    expect(body[0].balance).toBe(1000);
+    expect(body[0].balance).toBe(900);
   });
 });
