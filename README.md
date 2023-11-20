@@ -17,7 +17,7 @@ npm run dev
 <h1>Deploy</h1>
 A API está atualmente disponível no seguinte endereço:
 
-•     https://bet-api-b6ei.onrender.com
+•     https://bet-api-kofy.onrender.com
 
 <h1>Rotas</h1>
 <h2>Participantes</h2>
