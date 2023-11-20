@@ -1,5 +1,5 @@
 import participantRepository from '../repositories/participant-repository';
-import { badRequestError } from '@/errors';
+import { badRequestError } from '../errors/bad-request-error';
 
 async function createParticipant(name: string, balance: number) {
   return await participantRepository.createParticipant(name, balance);
