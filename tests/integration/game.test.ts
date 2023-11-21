@@ -271,20 +271,12 @@ describe('POST /games/:id/finish', () => {
       awayTeamScore: betOne.awayTeamScore,
     };
 
-    // console.log(betOne.amountBet)
-    // console.log(betTwo.amountBet)
-    // console.log(`newBalance: ${newBalance}`)
-    // console.log(`participantOne: ${participantOne.balance}`)
-
     const amountWonOne = Math.floor(
       (betOne.amountBet / (betOne.amountBet + betTwo.amountBet)) * (betOne.amountBet + betTwo.amountBet) * 0.7,
     );
     const amountWonTwo = Math.floor(
       (betTwo.amountBet / (betOne.amountBet + betTwo.amountBet)) * (betOne.amountBet + betTwo.amountBet) * 0.7,
     );
-
-    // console.log(`amountWonOne: ${amountWonOne}`);
-    // console.log(`amountWonTwo: ${amountWonTwo}`)
 
     await api.post(`/games/${game.id}/finish`).send(validBody);
 
@@ -293,7 +285,6 @@ describe('POST /games/:id/finish', () => {
     const participantOneUpdated = await getParticipantById(participantOne.id);
     const participantTwoUpdated = await getParticipantById(participantTwo.id);
 
-    // console.log(`participantOneUpdated: ${participantOneUpdated.balance}`);
     expect(participantOneUpdated.balance).toBe(newBalance + amountWonOne);
     expect(participantTwoUpdated.balance).toBe(newBalance + amountWonTwo);
   });
